@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.youhj.mapper.auth.exten.ResExtenMapper" >
+	<cache
+	eviction="FIFO"
+	flushInterval="600000"
+	size="512"
+	readOnly="true" />
+	<!-- 自定义查询方法，所有该模块 类似List<Map<String,Objct>> 模型都可以采用该方法 -->
+	<!-- 该方法将通过SQLNAME 注入制定 动态执行的SQL 语句块 -->
+	<!-- 配置代号select2xxx -->
+	<select id="selectResMap" parameterType="map" resultType="map">
+		<choose>
+			<!-- 加载系统菜单 -->
+			<when test='sqlName!=null and sqlName=="select2001" '>
+				<include refid="select2001"></include>
+			</when>
+		</choose>
+	</select>	
+	
+
+	
+	<!-- 根据条件加载菜单资源 -->
+	<sql id="select2001">
+		select distinct
+		tab_res.res_name AS "resName",
+		tab_res.res_short_name AS "resShortName",
+		tab_res.res_icon AS "resIcon",
+		tab_res.res_link AS "resLink",
+		tab_res.res_dis_flag AS "resDisFlag",
+		tab_res.res_type AS "resType",
+		tab_res.res_p_node AS "resPNode",
+		tab_role.role_name AS "roleName",
+		tab_role.role_id AS "roleId",
+		tab_auth.auth_res_id as "authResId",
+		tab_auth.auth_id as "authId",
+		tab_auth.auth_code as "authCode" 
+		from
+		tab_auth
+		inner join tab_role_auth on tab_role_auth.auth_id = tab_auth.auth_id
+		inner join tab_role on tab_role_auth.role_id = tab_role.role_id
+		left join tab_res on tab_auth.auth_res_id = tab_res.res_id
+		where tab_res.res_del_flag="y"
+		and tab_res.res_dis_flag="y"
+		and (tab_res.res_type = '1' or tab_res.res_type = '2')
+		order by tab_res.res_squen
+		
+	
+	</sql>
+
+</mapper>

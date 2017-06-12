@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.youhj.mapper.exten.UserRoleExtenMapper" >
+	<!-- 配置缓存 -->
+    <cache
+        eviction="FIFO"
+        flushInterval="600000"
+        size="512"
+        readOnly="true" />
+        
+	<!-- 自定义查询方法，所有该模块 类似List<Map<String,Objct>> 模型都可以采用该方法 -->
+	<!-- 该方法将通过SQLNAME 注入制定 动态执行的SQL 语句块 -->
+	<!-- 配置代号select4xxx -->
+	<select id="selectUserPermissMap" parameterType="map" resultType="map" useCache="false" >
+		<choose>
+		
+			<when test='sqlName!=null and sqlName=="select4001" '>
+				<include refid="select4001"></include>
+			</when>
+
+		</choose>
+	</select>
+	
+	
+	<!-- 根据条件 查询角色与用户关联关系数据 -->
+	<sql id="select4001" >
+	SELECT
+	tab_auth.auth_code AS "authCode"
+	FROM
+	tab_user
+	INNER JOIN tab_user_role ON tab_user.user_no = tab_user_role.user_id
+	INNER JOIN tab_role ON tab_user_role.role_id = tab_role.role_id
+	INNER JOIN tab_role_auth ON tab_role.role_id = tab_role_auth.role_id
+	INNER JOIN tab_auth ON tab_role_auth.auth_id = tab_auth.auth_id
+	WHERE tab_user.user_name = #{userName}
+	</sql>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.youhj.mapper.RoleAuthMapper" >
+	    <cache
+        eviction="FIFO"
+        flushInterval="600000"
+        size="512"
+        readOnly="true" />
+	<!-- 自定义查询方法，所有该模块 类似List<Map<String,Objct>> 模型都可以采用该方法 -->
+	<!-- 该方法将通过SQLNAME 注入制定 动态执行的SQL 语句块 -->
+	<!-- 配置代号select5xxx -->
+	
+	<select id="selectRoleAuthorityMap" parameterType="map" resultType="map" useCache="true">
+		<choose>
+			<when test='sqlName!=null and sqlName=="select6001" '>
+				<include refid="select6001"></include>
+			</when>
+			<when test='sqlName!=null and sqlName=="select6002" '>
+				<include refid="select6002"></include>
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getExistAuthDisc" parameterType="map" resultType="map" useCache="true">
+	<choose>
+		<when test='sqlName!=null and sqlName=="select6003" '>
+				<include refid="select6003"></include>
+		</when>
+	</choose>
+	</select>
+
+	<!-- 根据条件 查询角色信息 -->
+	<sql id="select6001">
+	SELECT
+	tab_role.role_name as "roleName"
+	FROM
+	tab_user
+	inner join tab_user_role on tab_user.user_no = tab_user_role.user_id
+	inner join tab_role on tab_user_role.role_id = tab_role.role_id
+	where
+	tab_user.user_name = #{userName}
+	</sql>
+	
+	
+	
+	<!-- 根据角色集合查询权限 -->
+	<sql id="select6002">
+	SELECT
+	tab_auth.auth_id as "authId"
+	from
+	tab_role
+	inner join tab_role_auth on tab_role_authy.role_id = tab_role.role_id
+	inner join tab_auth on tab_role_auth.auth_id = tab_auth.auth_id
+	where 1=0
+	<if test="rList!=null">
+		or tab_role.role_id in 
+        <foreach item="item" index="index" collection="rList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</if>
+
+	</sql>
+
+	<!-- 查询某角色相对某资源具有的权限 -->
+	<sql id="select6003">
+		select
+		tab_auth.auth_id AS "authId",
+		tab_auth.auth_disc AS "existAuthDisc"
+		from
+		tab_auth
+		INNER JOIN tab_role_auth ON tab_role_auth.auth_id = tab_auth.auth_id
+		INNER JOIN tab_role ON tab_role_auth.role_id = tab_role.role_id
+		LEFT JOIN	tab_res ON tab_auth.auth_res_id = tab_res.res_id
+		WHERE tab_res.res_id = #{resId} AND tab_role.role_id = #{roleId}
+	</sql>
+
+</mapper>
